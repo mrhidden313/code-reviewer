@@ -1,0 +1,143 @@
+{
+  "name": "local-robin-reviewer",
+  "displayName": "Local Robin Reviewer",
+  "description": "Local, private AI code reviews inspired by Robin Review, powered by Google Gemini.",
+  "version": "0.0.1",
+  "publisher": "robin-local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "localRobin.reviewChanges",
+        "title": "Local Robin: Review Uncommitted Changes",
+        "icon": "$(checklist)"
+      },
+      {
+        "command": "localRobin.clearReviews",
+        "title": "Local Robin: Clear All Review Comments",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "localRobin.refreshFindings",
+        "title": "Refresh Findings",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "localRobin.applyFix",
+        "title": "Apply Fix"
+      },
+      {
+        "command": "localRobin.dismissFinding",
+        "title": "Dismiss"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "localRobin.reviewChanges",
+          "group": "navigation@10"
+        },
+        {
+          "command": "localRobin.clearReviews",
+          "group": "navigation@11"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "localRobin.refreshFindings",
+          "when": "view == robinFindingsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "localRobin.clearReviews",
+          "when": "view == robinFindingsView",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "localRobin.applyFix",
+          "when": "false"
+        },
+        {
+          "command": "localRobin.dismissFinding",
+          "when": "false"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "robin-container",
+          "title": "Robin Reviewer",
+          "icon": "$(search-fuzzy)"
+        }
+      ]
+    },
+    "views": {
+      "robin-container": [
+        {
+          "type": "webview",
+          "id": "robinChatView",
+          "name": "Robin AI Companion",
+          "visibility": "visible"
+        },
+        {
+          "id": "robinFindingsView",
+          "name": "Robin Findings"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Local Robin Reviewer",
+      "properties": {
+        "localRobin.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini API Key for code reviews.",
+          "scope": "application"
+        },
+        "localRobin.model": {
+          "type": "string",
+          "default": "gemini-2.5-flash",
+          "description": "Configurable Gemini model name (e.g. gemini-2.5-flash, gemini-2.5-pro, or OpenAI-compatible model ID).",
+          "scope": "resource"
+        },
+        "localRobin.baseUrl": {
+          "type": "string",
+          "default": "https://generativelanguage.googleapis.com",
+          "description": "Base URL for Gemini API (e.g. https://generativelanguage.googleapis.com or OpenAI-compatible gateway).",
+          "scope": "resource"
+        },
+        "localRobin.maxTurns": {
+          "type": "integer",
+          "default": 5,
+          "description": "Maximum agent investigation turns for reading context and callers.",
+          "scope": "resource"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "tsc -p ./ --noEmit && node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "test": "node -e \"require('./out/test/git.test.js').runTests()\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.1",
+    "typescript": "^5.3.3"
+  }
+}
