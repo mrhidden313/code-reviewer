@@ -63,14 +63,9 @@ export class GeminiClient {
     // Construct valid Gemini v1beta URL
     const url = `${base}/v1beta/models/${model}:generateContent?key=${this.config.geminiApiKey}`;
 
-    // Map history to Gemini API structure
+    // Map history to Gemini API structure (role must strictly be 'user' or 'model')
     const geminiContents = history.map((msg) => {
-      let role = msg.role === 'model' ? 'model' : 'user';
-      // If content contains functionResponse, Gemini accepts role: "function" or "user"
-      const hasFunctionResponse = msg.parts.some((p) => Boolean(p.functionResponse));
-      if (hasFunctionResponse) {
-        role = 'function' as 'user';
-      }
+      const role = msg.role === 'model' ? 'model' : 'user';
 
       return {
         role,

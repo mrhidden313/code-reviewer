@@ -4,7 +4,7 @@ import { getLocalDiff } from './git';
 import { GeminiClient } from './gemini';
 import { WorkspaceToolbox } from './tools';
 import { buildUserPrompt, getRobinSystemPrompt } from './prompts';
-import { GeminiContent } from './types';
+import { GeminiContent, GeminiPart } from './types';
 import { RobinCommentManager } from './comments';
 
 export async function runLocalReview(
@@ -109,7 +109,8 @@ export async function runLocalReview(
             })),
           });
 
-          // Execute tool calls locally
+          // Execute tool calls locally and aggregate responses into a single user turn
+          const toolResponseParts: GeminiPart[] = [];
           for (const call of response.toolCalls) {
             if (token.isCancellationRequested) {
               return;
@@ -121,17 +122,18 @@ export async function runLocalReview(
 
             const result = await toolbox.executeTool(call.name, call.args);
 
-            // Record function response in history
+            toolResponseParts.push({
+              functionResponse: {
+                name: call.name,
+                response: result,
+              },
+            });
+          }
+
+          if (toolResponseParts.length > 0) {
             history.push({
               role: 'user',
-              parts: [
-                {
-                  functionResponse: {
-                    name: call.name,
-                    response: result,
-                  },
-                },
-              ],
+              parts: toolResponseParts,
             });
           }
         }

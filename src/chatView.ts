@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { GeminiClient } from './gemini';
 import { getExtensionConfig } from './config';
-import { GeminiContent, GeminiFunctionDeclaration } from './types';
+import { GeminiContent, GeminiFunctionDeclaration, GeminiPart } from './types';
 import { resolveTargetGitRoot } from './git';
 import { WorkspaceToolbox } from './tools';
 import { RobinCommentManager } from './comments';
@@ -199,12 +199,19 @@ If the user asks to review changes, call trigger_code_review.`;
           })),
         });
 
-        // Execute tools
+        // Execute tools and group responses into a single user message
+        const toolResponseParts: GeminiPart[] = [];
         for (const call of response.toolCalls) {
           const toolResult = await this.executeChatTool(call.name, call.args, repoRoot);
+          toolResponseParts.push({
+            functionResponse: { name: call.name, response: toolResult },
+          });
+        }
+
+        if (toolResponseParts.length > 0) {
           this.chatHistory.push({
             role: 'user',
-            parts: [{ functionResponse: { name: call.name, response: toolResult } }],
+            parts: toolResponseParts,
           });
         }
       }
