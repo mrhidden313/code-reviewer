@@ -3,6 +3,7 @@ import {
   GeminiContent, 
   GeminiFunctionDeclaration, 
   GeminiGenerateContentResponse, 
+  GeminiPart, 
   ToolCall 
 } from './types';
 import { TOOL_DECLARATIONS } from './tools';
@@ -10,6 +11,7 @@ import { TOOL_DECLARATIONS } from './tools';
 export interface GeminiResponse {
   text: string;
   toolCalls: ToolCall[];
+  rawParts: GeminiPart[];
 }
 
 export class GeminiClient {
@@ -79,10 +81,14 @@ export class GeminiClient {
             };
           }
           if (p.functionCall) {
+            const fc = p.functionCall;
+            const sig = fc.thought_signature || fc.thoughtSignature || p.thought_signature || p.thoughtSignature || 'skip_thought_signature_validator';
             return {
+              ...p,
+              thought_signature: sig,
               functionCall: {
-                name: p.functionCall.name,
-                args: p.functionCall.args,
+                ...fc,
+                thought_signature: sig,
               },
             };
           }
@@ -146,7 +152,7 @@ export class GeminiClient {
 
       const candidate = data.candidates?.[0];
       if (!candidate || !candidate.content) {
-        return { text: '', toolCalls: [] };
+        return { text: '', toolCalls: [], rawParts: [] };
       }
 
       const parts = candidate.content.parts || [];
@@ -170,6 +176,7 @@ export class GeminiClient {
       return {
         text: textResult,
         toolCalls,
+        rawParts: parts,
       };
     }
   }
@@ -291,7 +298,7 @@ export class GeminiClient {
     const data = (await response.json()) as OpenAiCompletionResponse;
     const choice = data.choices?.[0]?.message;
     if (!choice) {
-      return { text: '', toolCalls: [] };
+      return { text: '', toolCalls: [], rawParts: [] };
     }
 
     const toolCalls: ToolCall[] = (choice.tool_calls || []).map((tc) => {
@@ -311,6 +318,13 @@ export class GeminiClient {
     return {
       text: choice.content || '',
       toolCalls,
+      rawParts: toolCalls.map((tc) => ({
+        functionCall: {
+          name: tc.name,
+          args: tc.args,
+          thought_signature: 'skip_thought_signature_validator',
+        },
+      })),
     };
   }
 }

@@ -191,11 +191,11 @@ If the user asks to review changes, call trigger_code_review.`;
           break;
         }
 
-        // Add model tool calls to history
+        // Add model tool calls to history (preserving raw parts including thought signatures)
         this.chatHistory.push({
           role: 'model',
-          parts: response.toolCalls.map((tc) => ({
-            functionCall: { name: tc.name, args: tc.args },
+          parts: response.rawParts.length > 0 ? response.rawParts : response.toolCalls.map((tc) => ({
+            functionCall: { name: tc.name, args: tc.args, thought_signature: 'skip_thought_signature_validator' },
           })),
         });
 

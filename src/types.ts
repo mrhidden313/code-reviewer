@@ -38,9 +38,14 @@ export interface GeminiFunctionDeclaration {
 
 export interface GeminiPart {
   text?: string;
+  thought_signature?: string;
+  thoughtSignature?: string;
+  thought?: boolean;
   functionCall?: {
     name: string;
     args: Record<string, unknown>;
+    thought_signature?: string;
+    thoughtSignature?: string;
   };
   functionResponse?: {
     name: string;

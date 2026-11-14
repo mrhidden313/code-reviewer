@@ -98,13 +98,14 @@ export async function runLocalReview(
             break;
           }
 
-          // Record assistant turn in history
+          // Record assistant turn in history (preserving raw parts including thought signatures)
           history.push({
             role: 'model',
-            parts: response.toolCalls.map((tc) => ({
+            parts: response.rawParts.length > 0 ? response.rawParts : response.toolCalls.map((tc) => ({
               functionCall: {
                 name: tc.name,
                 args: tc.args,
+                thought_signature: 'skip_thought_signature_validator',
               },
             })),
           });
