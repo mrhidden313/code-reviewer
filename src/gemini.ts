@@ -82,13 +82,12 @@ export class GeminiClient {
           }
           if (p.functionCall) {
             const fc = p.functionCall;
-            const sig = fc.thought_signature || fc.thoughtSignature || p.thought_signature || p.thoughtSignature || 'skip_thought_signature_validator';
+            const sig = p.thought_signature || p.thoughtSignature || 'skip_thought_signature_validator';
             return {
-              ...p,
               thought_signature: sig,
               functionCall: {
-                ...fc,
-                thought_signature: sig,
+                name: fc.name,
+                args: fc.args || {},
               },
             };
           }
@@ -319,10 +318,10 @@ export class GeminiClient {
       text: choice.content || '',
       toolCalls,
       rawParts: toolCalls.map((tc) => ({
+        thought_signature: 'skip_thought_signature_validator',
         functionCall: {
           name: tc.name,
           args: tc.args,
-          thought_signature: 'skip_thought_signature_validator',
         },
       })),
     };

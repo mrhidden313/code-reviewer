@@ -102,10 +102,10 @@ export async function runLocalReview(
           history.push({
             role: 'model',
             parts: response.rawParts.length > 0 ? response.rawParts : response.toolCalls.map((tc) => ({
+              thought_signature: 'skip_thought_signature_validator',
               functionCall: {
                 name: tc.name,
                 args: tc.args,
-                thought_signature: 'skip_thought_signature_validator',
               },
             })),
           });

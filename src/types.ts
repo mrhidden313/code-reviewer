@@ -44,8 +44,6 @@ export interface GeminiPart {
   functionCall?: {
     name: string;
     args: Record<string, unknown>;
-    thought_signature?: string;
-    thoughtSignature?: string;
   };
   functionResponse?: {
     name: string;

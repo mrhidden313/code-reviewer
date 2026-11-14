@@ -195,7 +195,8 @@ If the user asks to review changes, call trigger_code_review.`;
         this.chatHistory.push({
           role: 'model',
           parts: response.rawParts.length > 0 ? response.rawParts : response.toolCalls.map((tc) => ({
-            functionCall: { name: tc.name, args: tc.args, thought_signature: 'skip_thought_signature_validator' },
+            thought_signature: 'skip_thought_signature_validator',
+            functionCall: { name: tc.name, args: tc.args },
           })),
         });
 
